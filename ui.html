@@ -52,14 +52,14 @@
           <select class="custom-select" id="select-mode">
             <option value="fuzzy" selected>Fuzzy</option>
             <option value="gene">Genetic Algorithm</option>
-            <!-- <option value="pso">PSO</option> -->
+            <option value="pso">PSO</option>
           </select>
         </div>
       </div>
     </div>
 
     <div class="row align-items-center d-none" id='row-train-cfg'>
-      <div class="col">
+      <div class="col train-cfg">
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">J</div>
@@ -67,23 +67,23 @@
           <input type="text" class="form-control bg-light" id="cfg-j" value="3">
         </div>
       </div>
-      <div class="col">
+      <div class="col train-cfg">
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">Iter</div>
           </div>
-          <input type="text" class="form-control bg-light" id="cfg-iter" value="64">
+          <input type="text" class="form-control bg-light" id="cfg-iter" value="32">
         </div>
       </div>
-      <div class="col">
+      <div class="col train-cfg">
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">Size</div>
           </div>
-          <input type="text" class="form-control bg-light" id="cfg-size" value="256">
+          <input type="text" class="form-control bg-light" id="cfg-size" value="64">
         </div>
       </div>
-      <div class="col">
+      <div class="col train-cfg cfg-gene">
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">Mutate</div>
@@ -91,12 +91,44 @@
           <input type="text" class="form-control bg-light" id="cfg-mutate" value="1">
         </div>
       </div>
-      <div class="col">
+      <div class="col train-cfg cfg-gene">
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">Crosover</div>
           </div>
           <input type="text" class="form-control bg-light" id="cfg-crossover" value="1">
+        </div>
+      </div>
+      <div class="col train-cfg cfg-pso">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Phi1</div>
+          </div>
+          <input type="text" class="form-control bg-light" id="cfg-phi1" value="0.5">
+        </div>
+      </div>
+      <div class="col train-cfg cfg-pso">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Phi2</div>
+          </div>
+          <input type="text" class="form-control bg-light" id="cfg-phi2" value="0.5">
+        </div>
+      </div>
+      <div class="col train-cfg cfg-pso">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Neib</div>
+          </div>
+          <input type="text" class="form-control bg-light" id="cfg-neighbor" value="32">
+        </div>
+      </div>
+      <div class="col train-cfg cfg-pso">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">vMax</div>
+          </div>
+          <input type="text" class="form-control bg-light" id="cfg-vMax" value="0.5">
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ const logger = require('./logger');
 const {performance} = require('perf_hooks');
 
 class GeneticOpt{
-  constructor(cfg = {iter: 10, population_size: 512, prob_mutation: 1, prob_crossover: 1, elite: 1}, predict, J) {
+  constructor(cfg = {iter: 10, size: 512, prob_mutation: 1, prob_crossover: 1, elite: 1}, predict, J) {
     this.cfg = cfg;
     this.predict = predict;
     this.J = J;
@@ -23,7 +23,7 @@ class GeneticOpt{
     return {theta, w, m, sigma};
   }
   
-  me(chromosome, data_set) {
+  mean_error(chromosome, data_set) {
     const dim_x = data_set[0].x.length;
     chromosome = this.parse_chromosome(chromosome, dim_x);
 
@@ -54,7 +54,7 @@ class GeneticOpt{
     const dim_x = train_set[0].x.length;
 
     // Initialize
-    let population = Array.from({length: this.cfg.population_size}, () => {
+    let population = Array.from({length: this.cfg.size}, () => {
       const theta = this.rand(-1, 1);
       const w = Array.from({length: this.J}, () => this.rand(-1, 1));
       const sigma = Array.from({length: this.J}, () => this.rand(0, 1));
@@ -75,7 +75,7 @@ class GeneticOpt{
         fitnesses.push({chromosome: c, fitness: this.fitness(train_set, c)});
       });
       let reproduce_counts = fitnesses.map(v => {
-        return Math.round(v.fitness / fitnesses.reduce((a, b) => ({fitness: a.fitness + b.fitness})).fitness * this.cfg.population_size);
+        return Math.round(v.fitness / fitnesses.reduce((a, b) => ({fitness: a.fitness + b.fitness})).fitness * this.cfg.size);
       });
       
       // Get elites 
@@ -88,12 +88,12 @@ class GeneticOpt{
       }
 
       // Fix reproduce count
-      while (reproduce_counts.reduce((a, b) => a + b) > this.cfg.population_size) {
+      while (reproduce_counts.reduce((a, b) => a + b) > this.cfg.size) {
         const j = Math.round(this.rand(0, reproduce_counts.length-1));
         if (reproduce_counts[j] > 0)
           reproduce_counts[j] -= 1;
       }
-      while (reproduce_counts.reduce((a, b) => a + b) < this.cfg.population_size) {
+      while (reproduce_counts.reduce((a, b) => a + b) < this.cfg.size) {
         const j = Math.round(this.rand(0, reproduce_counts.length-1));
         reproduce_counts[j] += 1;
       }
@@ -108,7 +108,7 @@ class GeneticOpt{
         
       // Crossover
       let offsprings = new Array();
-      while (offsprings.length < (this.cfg.population_size - this.cfg.elite)) {
+      while (offsprings.length < (this.cfg.size - this.cfg.elite)) {
         let indexes = [...Array(parents.length).keys()];       
         let ip1 = Math.round(this.rand(0, indexes.length - 1));
         ip1 = indexes.splice(ip1, 1)[0];
@@ -120,7 +120,7 @@ class GeneticOpt{
           let r = this.rand(0, 1);
           return (r <= this.cfg.prob_crossover) ? parents[ip2][j] : v;
         }));
-        if (offsprings.length === (this.cfg.population_size - this.cfg.elite)) break;
+        if (offsprings.length === (this.cfg.size - this.cfg.elite)) break;
         offsprings.push(parents[ip2].map((v, j) => {
           // return v + sigma * (v - parents[ip1][j]);
           let r = this.rand(0, 1);
@@ -165,7 +165,7 @@ class GeneticOpt{
       });
 
       let results = population_next.map(c => {
-        let me = this.me(c, train_set);
+        let me = this.mean_error(c, train_set);
         if (me < best.me) best = {c, me: me};
         return {c, me: me};
       });

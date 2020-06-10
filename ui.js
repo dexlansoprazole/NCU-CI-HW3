@@ -37,10 +37,14 @@ function readTrain(filepath, filename) {
       J: parseInt($('#cfg-j').val()),
       opt_cfg: {
         iter: parseInt($('#cfg-iter').val()),
-        population_size: parseInt($('#cfg-size').val()),
+        size: parseInt($('#cfg-size').val()),
         prob_mutation: parseFloat($('#cfg-mutate').val()),
         prob_crossover: parseFloat($('#cfg-crossover').val()),
-        elite: 1
+        phi1: parseFloat($('#cfg-phi1').val()),
+        phi2: parseFloat($('#cfg-phi2').val()),
+        elite: 1,
+        neighbors: parseInt($('#cfg-neighbor').val()),
+        vMax: parseFloat($('#cfg-vMax').val())
       }
     });
   });
@@ -374,9 +378,17 @@ $('#select-mode').change(function() {
       $('#row-train-cfg').addClass('d-none');
       ipcRenderer.send('start', $('#select-mode').val());
       break;
-    default:
+    case 'gene':
       $('#row-train').removeClass('d-none');
       $('#row-train-cfg').removeClass('d-none');
+      $('.cfg-gene').removeClass('d-none');
+      $('.cfg-pso').addClass('d-none');
+      break;
+    case 'pso':
+      $('#row-train').removeClass('d-none');
+      $('#row-train-cfg').removeClass('d-none');
+      $('.cfg-gene').addClass('d-none');
+      $('.cfg-pso').removeClass('d-none');
       break;
   }
 });

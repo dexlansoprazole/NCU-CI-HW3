@@ -1,5 +1,8 @@
+const logger = require('./logger');
+const {performance} = require('perf_hooks');
+
 class ParticalSwarmOpt{
-  constructor(cfg={iter: 10, size: 128, phi1: 0.5, phi2: 0.5, neighbors: 10, vMax: 0.5}, predict, J) {
+  constructor(cfg = {iter: 10, size: 128, phi1: 0.5, phi2: 0.5, neighbors: 10, vMax: 0.5}, predict, J) {
     this.cfg = cfg;
     this.predict = predict;
     this.J = J;
@@ -20,7 +23,7 @@ class ParticalSwarmOpt{
     return {theta, w, m, sigma};
   }
 
-  mse(partical, data_set) {
+  mean_error(partical, data_set) {
     const dim_x = data_set[0].x.length;
     partical = this.parse_partical(partical, dim_x);
 
@@ -51,7 +54,8 @@ class ParticalSwarmOpt{
     return l.reduce((a, b) => a + b) ** 0.5;
   }
 
-  train(train_set){
+  train(train_set) {
+    let t0 = performance.now();
     const dim_x = train_set[0].x.length;
 
     // Initialize
@@ -65,16 +69,18 @@ class ParticalSwarmOpt{
       m = m.flat();
       w.unshift(theta);
       let x = w.concat(m).concat(sigma);
-      return {x, fitness: this.fitness(train_set, x), v: new Array(x.length).fill(0)};
+      let fitness = this.fitness(train_set, x);
+      return {x, p: x, x_fitness: fitness, p_fitness: fitness, v: new Array(x.length).fill(0)};
     });
 
     // Main loop
-    let p = {pos: null, fitness: Infinity};
+    let best = {pos: null, fitness: Infinity, me: Infinity};
     for (let iter = 0; iter < this.cfg.iter; iter++){
-      for(let i = 0; i < particals.length; i++){
-        // Glogal best
-        if(particals[i].fitness < p.fitness){
-          p = {pos: particals[i].x.slice(), fitness: particals[i].fitness};
+      for (let i = 0; i < particals.length; i++){
+        // Self best
+        if (particals[i].x_fitness < particals[i].p_fitness) {
+          particals[i].p = particals[i].x;
+          particals[i].p_fitness = particals[i].x_fitness;
         }
 
         // Neighbor best
@@ -83,7 +89,7 @@ class ParticalSwarmOpt{
           return a.dis > b.dis ? 1 : -1;
         });
         neighbors = neighbors.slice(1, (this.cfg.neighbors + 1));
-        let g = {pos: particals[i].x, fitness: particals[i].fitness};
+        let g = {pos: particals[i].x, fitness: Infinity};
         neighbors.forEach(neighbor => {
           let fitness = this.fitness(train_set, neighbor.pos);
           if(fitness < g.fitness){
@@ -93,16 +99,26 @@ class ParticalSwarmOpt{
 
         // Update partical
         for(let d = 0; d < particals[i].x.length; d++){
-          particals[i].v[d] += this.cfg.phi1 * (p.pos[d] - particals[i].x[d]) + this.cfg.phi2 * (g.pos[d] - particals[i].x[d]);
+          particals[i].v[d] += this.cfg.phi1 * (particals[i].p[d] - particals[i].x[d]) + this.cfg.phi2 * (g.pos[d] - particals[i].x[d]);
           if(particals[i].v[d] > this.cfg.vMax) particals[i].v[d] = this.cfg.vMax;
           if(particals[i].v[d] < -this.cfg.vMax) particals[i].v[d] = -this.cfg.vMax;
           particals[i].x[d] += particals[i].v[d];
+          // logger(g.pos[d] - particals[i].x[d])
         }
-      }   
-      console.log('-------------------------------------------------\nloss:\t' + p.fitness);
-      console.log('mse:\t' + this.mse(p.pos, train_set));
+        particals[i].x_fitness = this.fitness(train_set, particals[i].x);
+
+        // Global best
+        if (particals[i].x_fitness < best.fitness) {
+          best.pos = particals[i].x;
+          best.fitness = particals[i].x_fitness;
+          best.me = this.mean_error(particals[i].x, train_set);
+        }
+      }
+      logger('-------------------------------------------------\nloss:\t' + best.fitness + '\nmean error:\t' + best.me);
     }
-    return this.parse_partical(p.pos, dim_x);
+    let t1 = performance.now();
+    logger('time: ' + (t1 - t0) / 1000 + ' sec');
+    return this.parse_partical(best.pos, dim_x);
   }
 }
 

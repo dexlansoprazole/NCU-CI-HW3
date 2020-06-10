@@ -24,26 +24,6 @@ class RBFN {
   }
 
   normalization(dataset) {
-    // dataset = dataset.map(data => {
-    //   let x = data.x;
-    //   let y = data.y;
-    //   const dim_x = x.length;
-    //   if (dim_x === 3) {
-    //     x = x.map(v => (v / 4105 ** 0.5 * 2 - 1));
-    //   }
-    //   if (dim_x === 5) {
-    //     x = x.map((v, i) => {
-    //       if (i === 0)
-    //         return ((v + 6) / 36 * 2 - 1);
-    //       else if (i === 1)
-    //         return ((v + 3) / 53 * 2 - 1);
-    //       else
-    //         return (v / 4105 ** 0.5 * 2 - 1);
-    //     });
-    //   }
-    //   y = (y + 40) / 80 * 2 - 1;
-    //   return {x, y};
-    // })
     let dim_x = dataset[0].x.length;
     let maxs_x = new Array(dim_x).fill(-Infinity);
     let mins_x = new Array(dim_x).fill(Infinity);
@@ -81,6 +61,7 @@ class RBFN {
       x = x.map((v, i) => (v - avgs_x[i]) / (maxs_x[i] - mins_x[i]));
 
       y = (y - avg_y) / (max_y - min_y);
+      // y = (y + 40) / 80 * 2 - 1;
       return {x, y};
     })
     return dataset;
@@ -157,13 +138,9 @@ class RBFN {
     }
 
     sensors = [sensors.center.val, sensors.right.val, sensors.left.val];
-    // sensors = sensors.map(v => (v / 4105 ** 0.5 * 2 - 1));
-    // x = ((x + 6) / 36 * 2 - 1);
-    // y = ((y + 3) / 53 * 2 - 1);
     
     let data = null;
     if (dim_x === 3) {
-      // data = sensors.slice();
       data = sensors.map((v, i) => (v - avgs_x[i]) / (maxs_x[i] - mins_x[i]));
     }
     else if (dim_x === 5) {
@@ -171,9 +148,8 @@ class RBFN {
       data = data.map((v, i) => (v - avgs_x[i]) / (maxs_x[i] - mins_x[i]));
     }
 
-    // return this.predict(Object.values(sensors).map(v => v.val).concat(x, y));
+    // return (this.predict(data) + 1) / 2 * 80 - 40;
     return this.predict(data) * (max_y - min_y) + avg_y;
-    return (this.predict(data) + 1) / 2 * 80 - 40;
   }
 }
 

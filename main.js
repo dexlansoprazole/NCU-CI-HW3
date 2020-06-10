@@ -112,7 +112,7 @@ app.on('ready', function() {
 
   ipcMain.on('train_res', (evt, arg) => {
     let params = parseParams(arg.params);
-    rbfn = new RBFN(arg.J, undefined, undefined, params);
+    rbfn = new RBFN(arg.J, arg.mode, arg.opt_cfg, params);
     mainWindow.webContents.send('train_res', {params});
   })
 
